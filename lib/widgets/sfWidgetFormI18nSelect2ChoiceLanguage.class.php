@@ -1,5 +1,4 @@
 <?php
-require_once(dirname(__FILE__) . '/../select2/Select2.class.php');
 
 /**
  * This widget is designed to generate more user friendly autocomplete widgets.
@@ -10,8 +9,8 @@ require_once(dirname(__FILE__) . '/../select2/Select2.class.php');
  * @author      Ing. Gerhard Schranz <g.schranz@bgcc.at>
  * @version     0.1 2013-03-11
  */
-class sfWidgetFormI18nSelect2ChoiceLanguage extends sfWidgetFormI18nChoiceLanguage
-{
+class sfWidgetFormI18nSelect2ChoiceLanguage extends sfWidgetFormI18nChoiceLanguage {
+
     /**
      * Configures the current widget.
      *
@@ -26,8 +25,7 @@ class sfWidgetFormI18nSelect2ChoiceLanguage extends sfWidgetFormI18nChoiceLangua
      *
      * @see sfWidgetForm
      */
-    protected function configure($options = array(), $attributes = array())
-    {
+    protected function configure($options = array(), $attributes = array()) {
         $this->addOption('width', sfConfig::get('sf_sfSelect2Widgets_width'));
 
         parent::configure($options, $attributes);
@@ -37,8 +35,7 @@ class sfWidgetFormI18nSelect2ChoiceLanguage extends sfWidgetFormI18nChoiceLangua
         }
     }
 
-    public function getChoices()
-    {
+    public function getChoices() {
         $choices = parent::getChoices();
 
         if (count($choices) > 0 && isset($choices['']) && $choices[''] == '') {
@@ -58,8 +55,7 @@ class sfWidgetFormI18nSelect2ChoiceLanguage extends sfWidgetFormI18nChoiceLangua
      *
      * @see sfWidgetForm
      */
-    public function render($name, $value = null, $attributes = array(), $errors = array())
-    {
+    public function render($name, $value = null, $attributes = array(), $errors = array()) {
         $id = $this->generateId($name);
 
         $return = parent::render($name, $value, $attributes, $errors);
@@ -87,23 +83,4 @@ EOF
         return $return;
     }
 
-    /**
-     * Gets the stylesheet paths associated with the widget.
-     *
-     * @return array An array of stylesheet paths
-     */
-    public function getStylesheets()
-    {
-        return Select2::addStylesheets();
-    }
-
-    /**
-     * Gets the JavaScript paths associated with the widget.
-     *
-     * @return array An array of JavaScript paths
-     */
-    public function getJavascripts()
-    {
-        return Select2::addJavascripts($this->getOption('culture'));
-    }
 }
