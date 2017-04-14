@@ -49,4 +49,5 @@ Installation via Git
                 
 Usage
 -----
-Coming soon...
+
+Update to select2 4.0 in progress. Please don't use. 
