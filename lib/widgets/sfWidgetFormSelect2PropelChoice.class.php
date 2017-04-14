@@ -10,7 +10,7 @@ require_once(dirname(__FILE__) . '/../select2/Select2.class.php');
  * @author      Ing. Gerhard Schranz <g.schranz@bgcc.at>
  * @version     0.1 2013-03-11
  */
-class sfWidgetFormI18nSelect2ChoiceLanguage extends sfWidgetFormI18nChoiceLanguage
+class sfWidgetFormSelect2PropelChoice extends sfWidgetFormPropelChoice
 {
     /**
      * Configures the current widget.
@@ -28,13 +28,10 @@ class sfWidgetFormI18nSelect2ChoiceLanguage extends sfWidgetFormI18nChoiceLangua
      */
     protected function configure($options = array(), $attributes = array())
     {
+        $this->addOption('culture', sfContext::getInstance()->getUser()->getCulture());
         $this->addOption('width', sfConfig::get('sf_sfSelect2Widgets_width'));
 
         parent::configure($options, $attributes);
-
-        if (!$this->getOption('culture')) {
-            $this->setOption('culture', sfContext::getInstance()->getUser()->getCulture());
-        }
     }
 
     public function getChoices()
@@ -74,7 +71,7 @@ function formatResult(item)
 jQuery("#%s").select2(
 {
     width:              '%s',
-    allowClear:         %s,
+    allowClear:         %s
 });
 </script>
 EOF

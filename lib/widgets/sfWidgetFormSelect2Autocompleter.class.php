@@ -1,4 +1,5 @@
 <?php
+require_once(dirname(__FILE__) . '/../select2/Select2.class.php');
 
 /**
  * This widget is designed to generate more user friendly autocomplete widgets.
@@ -9,7 +10,8 @@
  * @author      Ing. Gerhard Schranz <g.schranz@bgcc.at>
  * @version     0.1 2013-03-11
  */
-class sfWidgetFormSelect2Autocompleter extends sfWidgetFormInput {
+class sfWidgetFormSelect2Autocompleter extends sfWidgetFormInput
+{
     /**
      * Configures the current widget.
      *
@@ -24,7 +26,8 @@ class sfWidgetFormSelect2Autocompleter extends sfWidgetFormInput {
      *
      * @see sfWidgetForm
      */
-    protected function configure($options = array(), $attributes = array()) {
+    protected function configure($options = array(), $attributes = array())
+    {
         $this->addRequiredOption('url');
         $this->addRequiredOption('model');
         $this->addOption('value_callback', array($this, 'toString'));
@@ -47,7 +50,8 @@ class sfWidgetFormSelect2Autocompleter extends sfWidgetFormInput {
         parent::configure($options, $attributes);
     }
 
-    public function getChoices() {
+    public function getChoices()
+    {
         $choices = parent::getChoices();
 
         if (count($choices) > 0 && isset($choices['']) && $choices[''] == '') {
@@ -67,7 +71,8 @@ class sfWidgetFormSelect2Autocompleter extends sfWidgetFormInput {
      *
      * @see sfWidgetForm
      */
-    public function render($name, $value = null, $attributes = array(), $errors = array()) {
+    public function render($name, $value = null, $attributes = array(), $errors = array())
+    {
         $visible_value = escape_javascript($this->getOption('value_callback') ? call_user_func($this->getOption('value_callback'), $value) : $value);
 
         sfContext::getInstance()->getConfiguration()->loadHelpers('Url');
@@ -158,23 +163,46 @@ EOF
         return $return;
     }
 
-    protected function toString($value) {
+    /**
+     * Gets the stylesheet paths associated with the widget.
+     *
+     * @return array An array of stylesheet paths
+     */
+    public function getStylesheets()
+    {
+        return Select2::addStylesheets();
+    }
 
+    /**
+     * Gets the JavaScript paths associated with the widget.
+     *
+     * @return array An array of JavaScript paths
+     */
+    public function getJavascripts()
+    {
+        return Select2::addJavascripts($this->getOption('culture'));
+    }
+
+    protected function toString($value)
+    {
         $class = constant($this->getOption('model').'::PEER');
 
-        if ($class::hasBehavior('soft_delete')) {
+        if ($class::hasBehavior('soft_delete'))
+        {
             $class::disableSoftDelete();
         }
 
         $object = call_user_func(array($class, 'retrieveByPK'), $value);
 
-        if ($class::hasBehavior('soft_delete')) {
+        if ($class::hasBehavior('soft_delete'))
+        {
             $class::enableSoftDelete();
         }
 
         $method = $this->getOption('method');
 
-        if (!method_exists($this->getOption('model'), $method)) {
+        if (!method_exists($this->getOption('model'), $method))
+        {
             throw new RuntimeException(sprintf('Class "%s" must implement a "%s" method to be rendered in a "%s" widget', $this->getOption('model'), $method, __CLASS__));
         }
 
