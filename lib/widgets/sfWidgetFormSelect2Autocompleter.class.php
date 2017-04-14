@@ -39,10 +39,6 @@ class sfWidgetFormSelect2Autocompleter extends sfWidgetFormInput {
         $this->addOption('formatResult', 'defaultFormatResult');
         $this->addOption('formatNoMatches', 'defaultFormatNoMatches');
         $this->addOption('formatInputTooShort', 'defaultFormatInputTooShort');
-        $this->addOption('containerCss', '');
-        $this->addOption('containerCssClass', '');
-        $this->addOption('dropdownCss', '');
-        $this->addOption('dropdownCssClass', '');
 
         parent::configure($options, $attributes);
     }
@@ -107,10 +103,6 @@ jQuery("#%s").select2(
     formatResult:           %s,
     formatNoMatches:        %s,
     formatInputTooShort:    %s,
-    containerCss:           '%s',
-    containerCssClass:      '%s',
-    dropdownCss:            '%s',
-    dropdownCssClass:       '%s',
     ajax: {
         url:        '%s',
         dataType:   'json',
@@ -145,10 +137,6 @@ EOF
             $this->getOption('formatResult'),
             $this->getOption('formatNoMatches'),
             $this->getOption('formatInputTooShort'),
-            $this->getOption('containerCss'),
-            $this->getOption('containerCssClass'),
-            $this->getOption('dropdownCss'),
-            $this->getOption('dropdownCssClass'),
             url_for($this->getOption('url')),
             $id,
             $value,
