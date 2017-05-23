@@ -9,7 +9,7 @@
  * @author      Ing. Gerhard Schranz <g.schranz@bgcc.at>
  * @version     0.1 2013-03-11
  */
-class sfWidgetFormSelect2Autocompleter extends sfWidgetFormInput {
+class sfWidgetFormSelect2Autocompleter extends sfWidgetFormChoice {
     /**
      * Configures the current widget.
      *
@@ -26,12 +26,11 @@ class sfWidgetFormSelect2Autocompleter extends sfWidgetFormInput {
      */
     protected function configure($options = array(), $attributes = array()) {
         $this->addRequiredOption('url');
-        $this->addRequiredOption('model');
-        $this->addOption('value_callback', array($this, 'toString'));
-        $this->addOption('method', '__toString');
-
+        $this->addOption('result_callback');
+        $this->addOption('value_callback');
         $this->addOption('culture', sfContext::getInstance()->getUser()->getCulture());
         $this->addOption('width', sfConfig::get('sf_sfSelect2Widgets_width'));
+        $this->addOption('config', '{ }');
         $this->addOption('minimumInputLength', 2);
         $this->addOption('placeholder', '');
         $this->addOption('allowClear', true);
@@ -40,17 +39,9 @@ class sfWidgetFormSelect2Autocompleter extends sfWidgetFormInput {
         $this->addOption('formatNoMatches', 'defaultFormatNoMatches');
         $this->addOption('formatInputTooShort', 'defaultFormatInputTooShort');
 
+        $this->addOption('choices');
+
         parent::configure($options, $attributes);
-    }
-
-    public function getChoices() {
-        $choices = parent::getChoices();
-
-        if (count($choices) > 0 && isset($choices['']) && $choices[''] == '') {
-            $choices[''] = '&nbsp;';
-        }
-
-        return $choices;
     }
 
     /**
@@ -66,21 +57,20 @@ class sfWidgetFormSelect2Autocompleter extends sfWidgetFormInput {
     public function render($name, $value = null, $attributes = array(), $errors = array()) {
         $visible_value = escape_javascript($this->getOption('value_callback') ? call_user_func($this->getOption('value_callback'), $value) : $value);
 
-        sfContext::getInstance()->getConfiguration()->loadHelpers('Url');
-
         $id = $this->generateId($name);
+        $setDefaultValue = "";
+        if ($value !== null) {
+            $setDefaultValue = "jQuery('#{$id}').select2({ data: [{id: '{$value}',text: '{$visible_value}'}]});";
+        }
 
-        $return = $this->renderTag('input', array(
-            'type'  => 'hidden',
-            'name'  => $name,
-            'value' => $value
-        ));
+        $return = //$this->renderTag('input', array('type'  => 'hidden','name'  => $name,'value' => $visible_value)).
+        parent::render($name, $value, $attributes, $errors);
 
         $return .= sprintf(<<<EOF
 <script type="text/javascript">
 function defaultFormatResult(item)
 {
-    return item.text;
+    return item;
 }
 
 function defaultFormatNoMatches(term)
@@ -105,26 +95,37 @@ jQuery("#%s").select2(
     formatInputTooShort:    %s,
     ajax: {
         url:        '%s',
-        dataType:   'json',
+        //dataType:   'json',
+        type: 'POST',
         quietMillis: 100,
-        data:       function (term, page)
+        data:       function (param, page)
         {
             return {
-                q:     term,
-                limit: 10,
-                page:  page
+                q:     param.term,
+                //limit: 10,
+                //page:  page
             };
         },
-        results: function (data, page)
-        {
-            var more = (page * 10) < data.total;
-
-            return {results: data.items, more: more};
-        }
+        processResults: function (data, params) {
+            %s
+            var newdata = $.map(data, function (obj, key) {
+                var newobj = {
+                    text : obj.text || obj, // replace value with the property used for the text
+                    id : obj.id || key // replace key with the property used for the text
+                };
+                return newobj;
+            });
+            return {
+                results: newdata,
+            };
+        },
     }
 });
 
-jQuery('#%s').select2('data', { id: '%s', text: '%s' });
+jQuery(document).ready(function() {
+    %s
+});
+
 </script>
 EOF
             ,
@@ -137,35 +138,14 @@ EOF
             $this->getOption('formatResult'),
             $this->getOption('formatNoMatches'),
             $this->getOption('formatInputTooShort'),
-            url_for($this->getOption('url')),
-            $id,
-            $value,
-            $visible_value ? $visible_value : $this->getOption('placeholder', '')
+            $this->getOption('url'),
+            $result_callback = $this->getOption('result_callback') ? $this->getOption('result_callback') . '();' : '',
+            $setDefaultValue
+
         );
 
         return $return;
     }
 
-    protected function toString($value) {
 
-        $class = constant($this->getOption('model').'::PEER');
-
-        if ($class::hasBehavior('soft_delete')) {
-            $class::disableSoftDelete();
-        }
-
-        $object = call_user_func(array($class, 'retrieveByPK'), $value);
-
-        if ($class::hasBehavior('soft_delete')) {
-            $class::enableSoftDelete();
-        }
-
-        $method = $this->getOption('method');
-
-        if (!method_exists($this->getOption('model'), $method)) {
-            throw new RuntimeException(sprintf('Class "%s" must implement a "%s" method to be rendered in a "%s" widget', $this->getOption('model'), $method, __CLASS__));
-        }
-
-        return !is_null($object) ? $object->$method() : '';
-    }
 }
