@@ -44,12 +44,14 @@ class sfWidgetFormDoctrineSelect2Choice extends sfWidgetFormChoice
      */
     protected function configure($options = array(), $attributes = array())
     {
+        //die(sfConfig::get('sf_sfSelect2Widgets_width'));
         $this->addRequiredOption('model');
         $this->addOption('add_empty', false);
         $this->addOption('method', '__toString');
         $this->addOption('key_method', 'getPrimaryKey');
         $this->addOption('order_by', null);
         $this->addOption('query', null);
+        $this->addOption('width', sfConfig::get('sf_sfSelect2Widgets_width'));
         $this->addOption('multiple', false);
         $this->addOption('placeholder', '');
         $this->addOption('allowClear', true);
@@ -126,9 +128,10 @@ class sfWidgetFormDoctrineSelect2Choice extends sfWidgetFormChoice
   jQuery(document).ready(function() {
     jQuery("#%s")
     .select2({
-            placeholder: "%s"
-            ,allowClear: %s
-            ,multiple: %s
+            placeholder: "%s",
+            allowClear: %s,
+            multiple: %s,
+            width: '%s'
     });
   });
 </script>
@@ -139,6 +142,7 @@ EOF
             $this->getOption('placeholder'),
             ( $this->getOption('allowClear') ? 'true' : 'false' ),
             ( $this->getOption('multiple') ? 'true' : 'false' ),
+            $this->getOption('width'),
             $this->getOption('config') ? ",\n".$this->getOption('config') : ''
         );
 
